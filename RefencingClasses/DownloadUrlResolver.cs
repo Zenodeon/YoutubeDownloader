@@ -83,8 +83,8 @@ namespace YoutubeExtractor
                 throw new ArgumentException("URL is not a valid youtube URL!");
             }
 
-            //try
-            //{
+            try
+            {
                 var json = LoadJson(videoUrl);
 
                 string videoTitle = GetVideoTitle(json);
@@ -106,7 +106,8 @@ namespace YoutubeExtractor
                 }
 
                 return infos;
-            /*}
+
+            }
 
             catch (Exception ex)
             {
@@ -116,7 +117,7 @@ namespace YoutubeExtractor
                 }
 
                 ThrowYoutubeParseException(ex, videoUrl);
-            }*/
+            }
 
             return null; // Will never happen, but the compiler requires it
         }

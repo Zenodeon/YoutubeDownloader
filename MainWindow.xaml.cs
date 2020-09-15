@@ -19,8 +19,10 @@ using System.Net;
 using System.Net.Http;
 using System.Media;
 using System.IO.Packaging;
-
-using YoutubeExtractor;
+using Newtonsoft.Json;
+using System.Text.RegularExpressions;
+using System.Text.Json;
+using Newtonsoft.Json.Linq;
 
 namespace YoutubeDownloader
 {
@@ -31,46 +33,47 @@ namespace YoutubeDownloader
     {
         MediaPlayer player = new MediaPlayer();
 
-        String testVideoPath = "C:/Users/Admin/Desktop/magnets.mp4";
+        string testVideoPath = "C:/Users/Admin/Desktop/magnets.mp4";
 
+        string videoURL = "https://www.youtube.com/watch?v=vqiWcgaLNYY";
 
-
-        public HttpContent respt;
+        string savePath = "C:/Users/Admin/Downloads/YoutubeDownloader/";
 
         public MainWindow()
         {
             InitializeComponent();
 
-
+            //TextBox2.Text = System.Web.HttpUtility.UrlDecode(videoURL); 
             // player.Show();
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            //player.Play(testVideoPath);
+        {            
+            JObject VJson = GetJsonFromUrl(videoURL);
+            //TextBox2.Text = DecodeUrl(videoURL);
 
-            //player.PlayBack.Source = new Uri(testVideoPath);
-            string url = "https://www.youtube.com/watch?v=vqiWcgaLNYY";
-            Test(url);
-
+            SaveFile(VJson.ToString(), "YoutubeResponse");
         }
 
-
-        public void Test(string url)
+        public JObject GetJsonFromUrl(string url)
         {
-            IEnumerable<VideoInfo> videoInfos = DownloadUrlResolver.GetDownloadUrls(url);
-
-            VideoInfo video = videoInfos.First(info => info.VideoType == VideoType.Mp4 && info.Resolution == 1080);
-            if (video.RequiresDecryption)
+            string htmlfile;
+            using (var client = new WebClient())
             {
-                DownloadUrlResolver.DecryptDownloadUrl(video);
+                client.Encoding = Encoding.UTF8;
+                htmlfile = client.DownloadString(url);
             }
-            var videoDownloader = new VideoDownloader(video, System.IO.Path.Combine("D:/Downloads", video.Title + video.VideoExtension));
-            videoDownloader.DownloadProgressChanged += (sender, args) => Console.WriteLine(args.ProgressPercentage);
 
-            videoDownloader.Execute();
+            Regex dataRegex = new Regex(@"ytplayer\.config\s*=\s*(\{.+?\});", RegexOptions.Multiline);
+
+            string extractedJson = dataRegex.Match(htmlfile).Result("$1");
+            return JObject.Parse(extractedJson);
         }
-
+      
+        public void SaveFile(string data, string filename)
+        {
+            File.WriteAllText(savePath + filename, data);
+        }
     }
 
 }
