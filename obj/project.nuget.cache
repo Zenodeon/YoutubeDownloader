@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "W2dhtzArI7dF8s3eZl6LOSBDiOE66Ga2Hv2iFduG9nYFk3ZFeL5Mwgl++kPCYHkxegKGhBvcUlrrGb9snHQ2Jg==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\Admin\\Desktop\\YoutubeDownloader\\YoutubeDownloader.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Admin\\.nuget\\packages\\newtonsoft.json\\12.0.3\\newtonsoft.json.12.0.3.nupkg.sha512"
+  ],
+  "logs": []
+}
