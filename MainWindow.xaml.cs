@@ -23,6 +23,7 @@ using Newtonsoft.Json;
 using System.Text.RegularExpressions;
 using System.Text.Json;
 using Newtonsoft.Json.Linq;
+using YoutubeDownloader.Class;
 
 namespace YoutubeDownloader
 {
@@ -33,11 +34,11 @@ namespace YoutubeDownloader
     {
         MediaPlayer player = new MediaPlayer();
 
-        string testVideoPath = "C:/Users/Admin/Desktop/magnets.mp4";
+        //string testVideoPath = "C:/Users/Admin/Desktop/magnets.mp4";
 
-        string videoURL = "https://www.youtube.com/watch?v=vqiWcgaLNYY";
+        string videoURL = "https://www.youtube.com/watch?v=xOWH46e-p8M";
 
-        string savePath = "C:/Users/Admin/Downloads/YoutubeDownloader/";
+        
 
         public MainWindow()
         {
@@ -48,32 +49,14 @@ namespace YoutubeDownloader
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
-        {            
-            JObject VJson = GetJsonFromUrl(videoURL);
-            //TextBox2.Text = DecodeUrl(videoURL);
-
-            SaveFile(VJson.ToString(), "YoutubeResponse");
-        }
-
-        public JObject GetJsonFromUrl(string url)
         {
-            string htmlfile;
-            using (var client = new WebClient())
-            {
-                client.Encoding = Encoding.UTF8;
-                htmlfile = client.DownloadString(url);
-            }
+            JsonResponse.GetJsonResponse(videoURL);
 
-            Regex dataRegex = new Regex(@"ytplayer\.config\s*=\s*(\{.+?\});", RegexOptions.Multiline);
+            JObject VJson = JsonResponse.GetResponse();
 
-            string extractedJson = dataRegex.Match(htmlfile).Result("$1");
-            return JObject.Parse(extractedJson);
         }
-      
-        public void SaveFile(string data, string filename)
-        {
-            File.WriteAllText(savePath + filename, data);
-        }
+
+
     }
 
 }
