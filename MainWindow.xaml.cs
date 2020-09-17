@@ -44,7 +44,13 @@ namespace YoutubeDownloader
         {
             InitializeComponent();
 
-            //TextBox2.Text = System.Web.HttpUtility.UrlDecode(videoURL); 
+            string videoId = "xOWH46e-p8M";
+            string sts = null;
+            var eurl = WebUtility.HtmlEncode($"https://youtube.googleapis.com/v/{videoId}");
+
+            var url = $"https://youtube.com/get_video_info?video_id={videoId}&el=embedded&eurl={eurl}&hl=en&sts={sts}";
+
+            TextBox2.Text = url; 
             // player.Show();
         }
 
