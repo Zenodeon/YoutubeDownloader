@@ -31,21 +31,12 @@ namespace YoutubeDownloader.Class
 
             string extractedJson = dataRegex.Match(HTMLSource).Result("$1");
 
-            string videoId = "xOWH46e-p8M";
-            string sts = null;
-            var eurl = WebUtility.HtmlEncode($"https://youtube.googleapis.com/v/{videoId}");
-
-            var url = $"https://youtube.com/get_video_info?video_id={videoId}&el=embedded&eurl={eurl}&hl=en&sts={sts}";
-            //var raw =  HttpClient.GetStringAsync(url);
-
-            //var result = Parse(raw);
-
-            //GetNeededData(JObject.Parse(extractedJson));
+            GetNeededData(JObject.Parse(extractedJson));
 
         }
 
 
-
+        private const string RateBypassFlag = "ratebypass";
         private const string SignatureQuery = "signature";
         private static void GetNeededData(JObject response)
         {
@@ -53,16 +44,15 @@ namespace YoutubeDownloader.Class
             PlayerR = JObject.Parse(MainR["args"]["player_response"].ToString());
             StreamData = JObject.Parse(PlayerR["streamingData"].ToString());
 
+            SaveFile(MainR.ToString(), "YoutubeResponse");
+            SaveFile(PlayerR.ToString(), "YoutubePlayerResponse");
             SaveFile(StreamData.ToString(), "VideoStreamData");
-
-            //string[] whatthisdo = StreamData["adaptiveFormats"].ToString().Split(',');
 
             JArray AdFormats = JArray.Parse(StreamData["adaptiveFormats"].ToString());
 
             SaveFile(AdFormats[1].ToString(), "VideoAdaptiveFormats");
 
 
-            var dictionary2 = new Dictionary<string, string>();
             var dictionary3 = new Dictionary<string, string>();
 
 
@@ -70,13 +60,11 @@ namespace YoutubeDownloader.Class
             {
                 string[] strings = Regex.Split(vp, "=");
 
-                dictionary2.Add(strings[0], strings.Length == 2 ? strings[1] : string.Empty);
                 dictionary3.Add(strings[0], strings.Length == 2 ? HttpUtility.UrlDecode(strings[1]) : string.Empty);
             }
-            JObject dic2 = JObject.Parse(JsonConvert.SerializeObject(dictionary2).ToString());
+
             JObject dic3 = JObject.Parse(JsonConvert.SerializeObject(dictionary3).ToString());
 
-            SaveFile(dic2.ToString(), "dictionary2");
             SaveFile(dic3.ToString(), "dictionary3");
 
             string url;
@@ -95,26 +83,55 @@ namespace YoutubeDownloader.Class
                 SaveFile(url, "urlbig");
                 SaveFile(fallbackHost, "fallbackHost");
             }
-
             else
             {
                 url = dictionary3["url"];
 
                 SaveFile(url, "urlsmall");
             }
-            SaveFile(url, "URLBEFORE");
-            url = HttpUtility.UrlDecode(url);
-            SaveFile(url, "URLMID");
-            url = HttpUtility.UrlDecode(url);
-            SaveFile(url, "URLAFTER");
-            Uri uri = new Uri(url);
 
-            SaveFile(uri.ToString(), "URI");
+            url = HttpUtility.UrlDecode(url);
+            url = HttpUtility.UrlDecode(url);
 
+            SaveFile(url, "URL");
+
+
+
+            var surl = url.Substring(url.IndexOf('?') + 1);
+            SaveFile(surl, "SURL");
+
+            var dictionary4 = new Dictionary<string, string>();
+
+            foreach (string su in Regex.Split(surl, "&"))
+            {
+                string[] strings = Regex.Split(su, "=");
+
+                dictionary4.Add(strings[0], strings.Length == 2 ? HttpUtility.UrlDecode(strings[1]) : string.Empty);
+            }
+
+            JObject dic4 = JObject.Parse(JsonConvert.SerializeObject(dictionary4).ToString());
+
+            SaveFile(dic4.ToString(), "dictionary4");
+
+            IDictionary<string, string> parameters = dictionary4;
+            if (!parameters.ContainsKey(RateBypassFlag))
+            {
+                url += string.Format("&{0}={1}", RateBypassFlag, "yes");
+            }
+
+            SaveFile(url, "URLDECP");
+
+            string html5version = MainR["assets"]["js"].ToString();
+
+            SaveFile(html5version, "HTMLVERSION");
+
+            string Debbuging = DecipherWithVersion(AdFormats[1]["signatureCipher"].ToString(), html5version);
+
+            SaveFile(Debbuging, "Debbugged Values");
+
+            /*
             var request = (HttpWebRequest)WebRequest.Create(uri);
 
-
-           
             using (WebResponse Wresponse = request.GetResponse())
             {
                 using (Stream source = Wresponse.GetResponseStream())
@@ -138,6 +155,95 @@ namespace YoutubeDownloader.Class
                     }
                 }
             }
+            */
+        }
+        public static string DecipherWithVersion(string cipher, string cipherVersion)
+        {
+            string jsUrl = string.Format("http://www.youtube.com{0}", cipherVersion);
+            string js;
+            using (var client = new WebClient())
+            {
+                client.Encoding = Encoding.UTF8;
+                js = client.DownloadString(jsUrl);
+            }
+
+            
+
+            //Find "C" in this: var A = B.sig||C (B.s)
+            string functNamePattern = @"\""signature"",\s?([a-zA-Z0-9\$]+)\("; //Regex Formed To Find Word or DollarSign
+
+            var funcName = Regex.Match(js, functNamePattern).Groups[1].Value;
+
+            return funcName.ToString();
+            /*
+            if (funcName.Contains("$"))
+            {
+                funcName = "\\" + funcName; //Due To Dollar Sign Introduction, Need To Escape
+            }
+
+            string funcPattern = @"(?!h\.)" + @funcName + @"=function\(\w+\)\{.*?\}"; //Escape funcName string
+            var funcBody = Regex.Match(js, funcPattern, RegexOptions.Singleline).Value; //Entire sig function
+            var lines = funcBody.Split(';'); //Each line in sig function
+
+            string idReverse = "", idSlice = "", idCharSwap = ""; //Hold name for each cipher method
+            string functionIdentifier = "";
+            string operations = "";
+
+            foreach (var line in lines.Skip(1).Take(lines.Length - 2)) //Matches the funcBody with each cipher method. Only runs till all three are defined.
+            {
+                if (!string.IsNullOrEmpty(idReverse) && !string.IsNullOrEmpty(idSlice) &&
+                    !string.IsNullOrEmpty(idCharSwap))
+                {
+                    break; //Break loop if all three cipher methods are defined
+                }
+
+                functionIdentifier = GetFunctionFromLine(line);
+                string reReverse = string.Format(@"{0}:\bfunction\b\(\w+\)", functionIdentifier); //Regex for reverse (one parameter)
+                string reSlice = string.Format(@"{0}:\bfunction\b\([a],b\).(\breturn\b)?.?\w+\.", functionIdentifier); //Regex for slice (return or not)
+                string reSwap = string.Format(@"{0}:\bfunction\b\(\w+\,\w\).\bvar\b.\bc=a\b", functionIdentifier); //Regex for the char swap.
+
+                if (Regex.Match(js, reReverse).Success)
+                {
+                    idReverse = functionIdentifier; //If def matched the regex for reverse then the current function is a defined as the reverse
+                }
+
+                if (Regex.Match(js, reSlice).Success)
+                {
+                    idSlice = functionIdentifier; //If def matched the regex for slice then the current function is defined as the slice.
+                }
+
+                if (Regex.Match(js, reSwap).Success)
+                {
+                    idCharSwap = functionIdentifier; //If def matched the regex for charSwap then the current function is defined as swap.
+                }
+            }
+
+            foreach (var line in lines.Skip(1).Take(lines.Length - 2))
+            {
+                Match m;
+                functionIdentifier = GetFunctionFromLine(line);
+
+                if ((m = Regex.Match(line, @"\(\w+,(?<index>\d+)\)")).Success && functionIdentifier == idCharSwap)
+                {
+                    operations += "w" + m.Groups["index"].Value + " "; //operation is a swap (w)
+                }
+
+                if ((m = Regex.Match(line, @"\(\w+,(?<index>\d+)\)")).Success && functionIdentifier == idSlice)
+                {
+                    operations += "s" + m.Groups["index"].Value + " "; //operation is a slice
+                }
+
+                if (functionIdentifier == idReverse) //No regex required for reverse (reverse method has no parameters)
+                {
+                    operations += "r "; //operation is a reverse
+                }
+            }
+
+            operations = operations.Trim();
+
+            return DecipherWithOperations(cipher, operations);
+            */
+
         }
 
         public static JObject GetResponse()

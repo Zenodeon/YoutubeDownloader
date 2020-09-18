@@ -36,7 +36,7 @@ namespace YoutubeDownloader
 
         //string testVideoPath = "C:/Users/Admin/Desktop/magnets.mp4";
 
-        string videoURL = "https://www.youtube.com/watch?v=xOWH46e-p8M";
+        string videoURL = "https://www.youtube.com/watch?v=xOWH46e-p8M&hl=en";
 
         
 
@@ -44,13 +44,6 @@ namespace YoutubeDownloader
         {
             InitializeComponent();
 
-            string videoId = "xOWH46e-p8M";
-            string sts = null;
-            var eurl = WebUtility.HtmlEncode($"https://youtube.googleapis.com/v/{videoId}");
-
-            var url = $"https://youtube.com/get_video_info?video_id={videoId}&el=embedded&eurl={eurl}&hl=en&sts={sts}";
-
-            TextBox2.Text = url; 
             // player.Show();
         }
 
