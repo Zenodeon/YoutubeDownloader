@@ -26,12 +26,13 @@ namespace YoutubeDownloader.Class
                 client.Encoding = Encoding.UTF8;
                 HTMLSource = client.DownloadString(videoURL);
             }
-
-            Regex dataRegex = new Regex(@"ytplayer\.config\s*=\s*(\{.+?\});", RegexOptions.Multiline);
-
+            SaveFile(HTMLSource, "EmbedPage");
+            
+            //Regex dataRegex = new Regex(@"ytplayer\.config\s*=\s*(\{.+?\});", RegexOptions.Multiline);
+            Regex dataRegex = new Regex(@"yt.setConfig({+?});", RegexOptions.Multiline);
             string extractedJson = dataRegex.Match(HTMLSource).Result("$1");
-
-            GetNeededData(JObject.Parse(extractedJson));
+            SaveFile(extractedJson, "EmbedPageJSON");
+            //GetNeededData(JObject.Parse(extractedJson));
 
         }
 
@@ -159,7 +160,9 @@ namespace YoutubeDownloader.Class
         }
         public static string DecipherWithVersion(string cipher, string cipherVersion)
         {
-            string jsUrl = string.Format("http://www.youtube.com{0}", cipherVersion);
+        
+            //string jsUrl = string.Format("https://www.youtube.com{0}", cipherVersion);
+            string jsUrl = string.Format("https://www.youtube.com/yts/jsbin/player-en_US-vfl8LqiZp/base.js", cipherVersion);
             string js;
             using (var client = new WebClient())
             {
@@ -167,22 +170,27 @@ namespace YoutubeDownloader.Class
                 js = client.DownloadString(jsUrl);
             }
 
-            
+            SaveFile(js, "JSSource");
 
             //Find "C" in this: var A = B.sig||C (B.s)
             string functNamePattern = @"\""signature"",\s?([a-zA-Z0-9\$]+)\("; //Regex Formed To Find Word or DollarSign
 
-            var funcName = Regex.Match(js, functNamePattern).Groups[1].Value;
+            var funcName = Regex.Match(js, functNamePattern);
+
+            SaveFile(funcName.ToString(), "Function name");
 
             return funcName.ToString();
             /*
-            if (funcName.Contains("$"))
-            {
-                funcName = "\\" + funcName; //Due To Dollar Sign Introduction, Need To Escape
-            }
+           // if (funcName.ToString().Contains("$"))
+           // {
+           //     funcName = "\\" + funcName; //Due To Dollar Sign Introduction, Need To Escape
+           // }
 
             string funcPattern = @"(?!h\.)" + @funcName + @"=function\(\w+\)\{.*?\}"; //Escape funcName string
             var funcBody = Regex.Match(js, funcPattern, RegexOptions.Singleline).Value; //Entire sig function
+
+            return funcBody;
+            
             var lines = funcBody.Split(';'); //Each line in sig function
 
             string idReverse = "", idSlice = "", idCharSwap = ""; //Hold name for each cipher method

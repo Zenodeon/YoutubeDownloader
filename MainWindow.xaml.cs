@@ -36,8 +36,8 @@ namespace YoutubeDownloader
 
         //string testVideoPath = "C:/Users/Admin/Desktop/magnets.mp4";
 
-        string videoURL = "https://www.youtube.com/watch?v=xOWH46e-p8M&hl=en";
-
+        //string videoURL = "https://www.youtube.com/watch?v=xOWH46e-p8M&hl=en";
+        string videoURL = "https://www.youtube.com/embed/xOWH46e-p8M?hl=en";
         
 
         public MainWindow()
