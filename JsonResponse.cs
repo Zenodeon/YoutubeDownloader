@@ -18,21 +18,38 @@ namespace YoutubeDownloader.Class
         static JObject PlayerR;
         static JObject StreamData;
 
-        public static void GetJsonResponse(string videoURL)
+        public static void GetJsonResponse(string videoURL, string VideoID)
         {
-            string HTMLSource;
+            string HTMLDetails;
+            string videoDetails = string.Format("https://www.youtube.com/get_video_info?video_id={0}&el=detailpage", VideoID)
+                ;
             using (var client = new WebClient())
             {
                 client.Encoding = Encoding.UTF8;
-                HTMLSource = client.DownloadString(videoURL);
+
+                HTMLDetails = client.DownloadString(videoDetails);
             }
-            SaveFile(HTMLSource, "EmbedPage");
-            
+            SaveFile(HTMLDetails, "YoutubeInfo");
+     
+            var dictionary1 = new Dictionary<string, string>();
+
+            foreach (string vp in Regex.Split(HTMLDetails, "&"))
+            {
+                string[] strings = Regex.Split(vp, "=");
+
+                dictionary1.Add(strings[0], strings.Length == 2 ? HttpUtility.UrlDecode(strings[1]) : string.Empty);
+            }
+
+            JObject dic1 = JObject.Parse(JsonConvert.SerializeObject(dictionary1).ToString());
+
+            SaveFile(dic1.ToString(), "dictionary1");
+
+     
             //Regex dataRegex = new Regex(@"ytplayer\.config\s*=\s*(\{.+?\});", RegexOptions.Multiline);
-            Regex dataRegex = new Regex(@"yt.setConfig({+?});", RegexOptions.Multiline);
-            string extractedJson = dataRegex.Match(HTMLSource).Result("$1");
-            SaveFile(extractedJson, "EmbedPageJSON");
-            //GetNeededData(JObject.Parse(extractedJson));
+            //Regex dataRegex = new Regex(@"yt.setConfig({+?});", RegexOptions.Multiline);
+            //string extractedJson = dataRegex.Match(HTMLSource).Result("$1");
+            //SaveFile(extractedJson, "EmbedPageJSON");
+            GetNeededData(dic1);
 
         }
 
@@ -42,22 +59,22 @@ namespace YoutubeDownloader.Class
         private static void GetNeededData(JObject response)
         {
             MainR = response;
-            PlayerR = JObject.Parse(MainR["args"]["player_response"].ToString());
+            PlayerR = JObject.Parse(MainR["player_response"].ToString());
             StreamData = JObject.Parse(PlayerR["streamingData"].ToString());
 
             SaveFile(MainR.ToString(), "YoutubeResponse");
             SaveFile(PlayerR.ToString(), "YoutubePlayerResponse");
             SaveFile(StreamData.ToString(), "VideoStreamData");
 
-            JArray AdFormats = JArray.Parse(StreamData["adaptiveFormats"].ToString());
+            JArray AdFormats = JArray.Parse(StreamData["formats"].ToString());
 
-            SaveFile(AdFormats[1].ToString(), "VideoAdaptiveFormats");
+            SaveFile(AdFormats.ToString(), "VideoAdaptiveFormats");
 
-
+            
             var dictionary3 = new Dictionary<string, string>();
 
 
-            foreach (string vp in Regex.Split(AdFormats[1]["signatureCipher"].ToString(), "&"))
+            foreach (string vp in Regex.Split(AdFormats[0]["signatureCipher"].ToString(), "&"))
             {
                 string[] strings = Regex.Split(vp, "=");
 
@@ -67,36 +84,18 @@ namespace YoutubeDownloader.Class
             JObject dic3 = JObject.Parse(JsonConvert.SerializeObject(dictionary3).ToString());
 
             SaveFile(dic3.ToString(), "dictionary3");
-
+            
             string url;
 
-            if (dictionary3.ContainsKey("s") || dictionary3.ContainsKey("sig"))
-            {
-                //requiresDecryption = dictionary3.ContainsKey("s");
-                string signature = dictionary3.ContainsKey("s") ? dictionary3["s"] : dictionary3["sig"];
-
-                url = string.Format("{0}&{1}={2}", dictionary3["url"], SignatureQuery, signature);
-
-                string fallbackHost = dictionary3.ContainsKey("fallback_host") ? "&fallback_host=" + dictionary3["fallback_host"] : String.Empty;
-
-                url += fallbackHost;
-
-                SaveFile(url, "urlbig");
-                SaveFile(fallbackHost, "fallbackHost");
-            }
-            else
-            {
                 url = dictionary3["url"];
 
                 SaveFile(url, "urlsmall");
-            }
+            
 
-            url = HttpUtility.UrlDecode(url);
             url = HttpUtility.UrlDecode(url);
 
             SaveFile(url, "URL");
-
-
+            
 
             var surl = url.Substring(url.IndexOf('?') + 1);
             SaveFile(surl, "SURL");
@@ -112,7 +111,7 @@ namespace YoutubeDownloader.Class
 
             JObject dic4 = JObject.Parse(JsonConvert.SerializeObject(dictionary4).ToString());
 
-            SaveFile(dic4.ToString(), "dictionary4");
+            SaveFile(dic4.ToString(), "dictionary4_4");
 
             IDictionary<string, string> parameters = dictionary4;
             if (!parameters.ContainsKey(RateBypassFlag))
@@ -121,7 +120,7 @@ namespace YoutubeDownloader.Class
             }
 
             SaveFile(url, "URLDECP");
-
+            /*
             string html5version = MainR["assets"]["js"].ToString();
 
             SaveFile(html5version, "HTMLVERSION");

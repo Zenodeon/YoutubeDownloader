@@ -24,6 +24,7 @@ using System.Text.RegularExpressions;
 using System.Text.Json;
 using Newtonsoft.Json.Linq;
 using YoutubeDownloader.Class;
+using System.Web;
 
 namespace YoutubeDownloader
 {
@@ -35,10 +36,10 @@ namespace YoutubeDownloader
         MediaPlayer player = new MediaPlayer();
 
         //string testVideoPath = "C:/Users/Admin/Desktop/magnets.mp4";
-
+        string videoURL = "https://www.youtube.com/watch?v=xzIADWo9-bc&hl=en";
         //string videoURL = "https://www.youtube.com/watch?v=xOWH46e-p8M&hl=en";
-        string videoURL = "https://www.youtube.com/embed/xOWH46e-p8M?hl=en";
-        
+        //string videoURL = "https://www.youtube.com/embed/xOWH46e-p8M?hl=en";
+        string videoID = "xOWH46e-p8M";
 
         public MainWindow()
         {
@@ -49,7 +50,7 @@ namespace YoutubeDownloader
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            JsonResponse.GetJsonResponse(videoURL);
+            JsonResponse.GetJsonResponse(videoURL, videoID);
 
             JObject VJson = JsonResponse.GetResponse();
 
