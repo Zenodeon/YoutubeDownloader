@@ -9,6 +9,7 @@ using System.IO;
 using System.Web;
 using Newtonsoft.Json;
 using System.Net.Http;
+using YoutubeDownloader.Classes;
 
 namespace YoutubeDownloader.Class
 {
@@ -18,11 +19,13 @@ namespace YoutubeDownloader.Class
         static JObject PlayerR;
         static JObject StreamData;
 
-        public static void GetJsonResponse(string videoURL, string VideoID)
+        public static void GetJsonResponse(string videoURL)
         {
+            string videoID = LinkManager.GetVideoID(videoURL);
+
             string HTMLDetails;
-            string videoDetails = string.Format("https://www.youtube.com/get_video_info?video_id={0}&el=detailpage", VideoID)
-                ;
+            //string videoDetails = string.Format("https://www.youtube.com/get_video_info?video_id={0}&el=detailpage", videoID);
+            string videoDetails = videoURL;
             using (var client = new WebClient())
             {
                 client.Encoding = Encoding.UTF8;
@@ -30,7 +33,7 @@ namespace YoutubeDownloader.Class
                 HTMLDetails = client.DownloadString(videoDetails);
             }
             SaveFile(HTMLDetails, "YoutubeInfo");
-     
+            /*
             var dictionary1 = new Dictionary<string, string>();
 
             foreach (string vp in Regex.Split(HTMLDetails, "&"))
@@ -44,13 +47,15 @@ namespace YoutubeDownloader.Class
 
             SaveFile(dic1.ToString(), "dictionary1");
 
-     
-            //Regex dataRegex = new Regex(@"ytplayer\.config\s*=\s*(\{.+?\});", RegexOptions.Multiline);
-            //Regex dataRegex = new Regex(@"yt.setConfig({+?});", RegexOptions.Multiline);
-            //string extractedJson = dataRegex.Match(HTMLSource).Result("$1");
-            //SaveFile(extractedJson, "EmbedPageJSON");
-            GetNeededData(dic1);
+             GetNeededData(dic1);
+            */
 
+
+            Regex dataRegex = new Regex(@"ytplayer\.config\s*=\s*(\{.+?\});", RegexOptions.Multiline);
+            string extractedJson = dataRegex.Match(HTMLDetails).Result("$1");
+            SaveFile(extractedJson, "EmbedPageJSON");
+
+            GetNeededData(JObject.Parse(extractedJson));
         }
 
 
@@ -59,7 +64,8 @@ namespace YoutubeDownloader.Class
         private static void GetNeededData(JObject response)
         {
             MainR = response;
-            PlayerR = JObject.Parse(MainR["player_response"].ToString());
+            var assetsjs = MainR["assets"]["js"].ToString();
+            PlayerR = JObject.Parse(MainR["args"]["player_response"].ToString());
             StreamData = JObject.Parse(PlayerR["streamingData"].ToString());
 
             SaveFile(MainR.ToString(), "YoutubeResponse");
@@ -84,7 +90,13 @@ namespace YoutubeDownloader.Class
             JObject dic3 = JObject.Parse(JsonConvert.SerializeObject(dictionary3).ToString());
 
             SaveFile(dic3.ToString(), "dictionary3");
-            
+
+            findd(dic3, assetsjs);
+
+   
+
+
+            /*
             string url;
 
                 url = dictionary3["url"];
@@ -157,6 +169,21 @@ namespace YoutubeDownloader.Class
             }
             */
         }
+
+
+        private static void findd(JObject idk, string assetsjs)
+        {
+            string js;
+            string jsUrl =
+                string.Format("https://www.youtube.com{0}", assetsjs);
+            using (var client = new WebClient())
+            {
+                client.Encoding = Encoding.UTF8;
+                js = client.DownloadString(jsUrl);
+            }
+            SaveFile(js, "JSSource");
+        }
+
         public static string DecipherWithVersion(string cipher, string cipherVersion)
         {
         
