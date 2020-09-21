@@ -10,6 +10,8 @@ using System.Web;
 using Newtonsoft.Json;
 using System.Net.Http;
 using YoutubeDownloader.Classes;
+using System.Threading.Tasks;
+using System.Linq;
 
 namespace YoutubeDownloader.Class
 {
@@ -21,6 +23,7 @@ namespace YoutubeDownloader.Class
 
         public static void GetJsonResponse(string videoURL)
         {
+
             string videoID = LinkManager.GetVideoID(videoURL);
 
             string HTMLDetails;
@@ -32,7 +35,7 @@ namespace YoutubeDownloader.Class
 
                 HTMLDetails = client.DownloadString(videoDetails);
             }
-            SaveFile(HTMLDetails, "YoutubeInfo");
+            Debug.SaveFile(HTMLDetails, "YoutubeInfo");
             /*
             var dictionary1 = new Dictionary<string, string>();
 
@@ -53,7 +56,7 @@ namespace YoutubeDownloader.Class
 
             Regex dataRegex = new Regex(@"ytplayer\.config\s*=\s*(\{.+?\});", RegexOptions.Multiline);
             string extractedJson = dataRegex.Match(HTMLDetails).Result("$1");
-            SaveFile(extractedJson, "EmbedPageJSON");
+            Debug.SaveFile(extractedJson, "EmbedPageJSON");
 
             GetNeededData(JObject.Parse(extractedJson));
         }
@@ -68,13 +71,13 @@ namespace YoutubeDownloader.Class
             PlayerR = JObject.Parse(MainR["args"]["player_response"].ToString());
             StreamData = JObject.Parse(PlayerR["streamingData"].ToString());
 
-            SaveFile(MainR.ToString(), "YoutubeResponse");
-            SaveFile(PlayerR.ToString(), "YoutubePlayerResponse");
-            SaveFile(StreamData.ToString(), "VideoStreamData");
+            Debug.SaveFile(MainR.ToString(), "YoutubeResponse");
+            Debug.SaveFile(PlayerR.ToString(), "YoutubePlayerResponse");
+            Debug.SaveFile(StreamData.ToString(), "VideoStreamData");
 
             JArray AdFormats = JArray.Parse(StreamData["formats"].ToString());
 
-            SaveFile(AdFormats.ToString(), "VideoAdaptiveFormats");
+            Debug.SaveFile(AdFormats.ToString(), "VideoAdaptiveFormats");
 
             
             var dictionary3 = new Dictionary<string, string>();
@@ -89,12 +92,9 @@ namespace YoutubeDownloader.Class
 
             JObject dic3 = JObject.Parse(JsonConvert.SerializeObject(dictionary3).ToString());
 
-            SaveFile(dic3.ToString(), "dictionary3");
+            Debug.SaveFile(dic3.ToString(), "dictionary3");
 
             findd(dic3, assetsjs);
-
-   
-
 
             /*
             string url;
@@ -171,6 +171,7 @@ namespace YoutubeDownloader.Class
         }
 
 
+
         private static void findd(JObject idk, string assetsjs)
         {
             string js;
@@ -181,7 +182,39 @@ namespace YoutubeDownloader.Class
                 client.Encoding = Encoding.UTF8;
                 js = client.DownloadString(jsUrl);
             }
-            SaveFile(js, "JSSource");
+            Debug.SaveFile(js, "JSSource");
+
+            
+            string? TryGetDeciphererFuncBody()
+            {
+                var funcName = Regex.Match(js, @"(\w+)=function\(\w+\){(\w+)=\2\.split\(\x22{2}\);.*?return\s+\2\.join\(\x22{2}\)}")
+                    .Groups[0]
+                    .Value;
+
+                return funcName;
+            }
+
+            Debug.SaveFile(TryGetDeciphererFuncBody().ToString(), "FunctionName");
+
+            string? TryGetDeciphererDefinitionBody(string body)
+            {
+                var objName = Regex.Match(body, "([\\$_\\w]+).\\w+\\(\\w+,\\d+\\);")
+                    .Groups[1]
+                    .Value;
+
+                var escapedObjName = Regex.Escape(objName);
+
+                return Regex.Match(js, $@"var\s+{escapedObjName}=\{{(\w+:function\(\w+(,\w+)?\)\{{(.*?)\}}),?\}};", RegexOptions.Singleline)
+                    .Groups[0]
+                    .Value;
+  
+            }
+
+            
+
+            Debug.SaveFile(TryGetDeciphererDefinitionBody(TryGetDeciphererFuncBody()).ToString(), "FunctionBody");
+
+
         }
 
         public static string DecipherWithVersion(string cipher, string cipherVersion)
@@ -196,14 +229,14 @@ namespace YoutubeDownloader.Class
                 js = client.DownloadString(jsUrl);
             }
 
-            SaveFile(js, "JSSource");
+            Debug.SaveFile(js, "JSSource");
 
             //Find "C" in this: var A = B.sig||C (B.s)
             string functNamePattern = @"\""signature"",\s?([a-zA-Z0-9\$]+)\("; //Regex Formed To Find Word or DollarSign
 
             var funcName = Regex.Match(js, functNamePattern);
 
-            SaveFile(funcName.ToString(), "Function name");
+            Debug.SaveFile(funcName.ToString(), "Function name");
 
             return funcName.ToString();
             /*
@@ -295,16 +328,7 @@ namespace YoutubeDownloader.Class
             return StreamData;
         }
 
-        //For Debugging
-        private static string savePath = "C:/Users/Admin/Downloads/YoutubeDownloader/";
-        public static void SaveFile(string data, string filename, string extension = null)
-        {
-            File.WriteAllText(savePath + filename + extension, data);
-        }
-        public static void SaveFile(string[] data, string filename, string extension = null)
-        {
-            File.WriteAllLines(savePath + filename + extension, data);
-        }
+
     }
 }
     
