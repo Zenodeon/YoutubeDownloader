@@ -5,9 +5,20 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:YoutubeDownloader"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="800"
+        Background="#343434">
     <Grid>
-        <Button Height="50" Width="150" Click="Button_Click" Margin="325,38,325,346"></Button>
-        <TextBox Name="TextBox2" HorizontalAlignment="Center" Margin="0,103,0,0" Text="TextBox" TextWrapping="Wrap" VerticalAlignment="Top" Width="694" Height="291"/>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="105*"/>
+            <RowDefinition Height="284*"/>
+            <RowDefinition Height="45*"/>
+        </Grid.RowDefinitions>
+        <Label Name="debug" Content="DebugLabel" Foreground="White" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="143" Height="26"/>
+        <TextBox Name="videoURL" HorizontalAlignment="Left" FontSize="15" Margin="10,0,0,0" Text="URL" TextWrapping="NoWrap" VerticalAlignment="Center" Width="584" Height="22" TextChanged="videoURL_TextChanged"/>
+        <Button Name="Download_Button" Content="Download" HorizontalAlignment="Right" Margin="653,23,10,0" VerticalAlignment="Top" Height="41" Width="127" Click="Download_Button_Click"/>
+        <Image Name="VideoThumbnail_Image" HorizontalAlignment="Left" Height="239" Margin="10,21,0,0" VerticalAlignment="Top" Width="447" Grid.Row="1"/>
+        <Rectangle Name="Bar" HorizontalAlignment="Left" Height="25" Margin="10,0,10,0" Grid.Row="2" Fill="GreenYellow" VerticalAlignment="Center" Width="780"/>
+
+
     </Grid>
-</Window>
+</Window> 

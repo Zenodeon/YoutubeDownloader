@@ -26,6 +26,7 @@ using Newtonsoft.Json.Linq;
 using YoutubeDownloader.Class;
 using System.Web;
 using YoutubeDownloader.Classes;
+using System.Timers;
 
 
 namespace YoutubeDownloader
@@ -35,12 +36,10 @@ namespace YoutubeDownloader
     /// </summary>
     public partial class MainWindow : Window
     {
-        MediaPlayer player = new MediaPlayer();
-
         //string testVideoPath = "C:/Users/Admin/Desktop/magnets.mp4";
         //string videoURL = "https://www.youtube.com/watch?v=xzIADWo9-bc&hl=en";
         //string videoURL = "https://www.youtube.com/watch?v=xOWH46e-p8M&hl=en";
-        string videoURL = "https://www.youtube.com/watch?v=wWQPnhG0xHU";
+        string testvideoURL = "https://www.youtube.com/watch?v=wWQPnhG0xHU";
         //string videoURL = "https://www.youtube.com/embed/xOWH46e-p8M?hl=en";
         string videoID = "xOWH46e-p8M";
 
@@ -48,21 +47,33 @@ namespace YoutubeDownloader
         {
             InitializeComponent();
 
-            // player.Show();
+            //debug.Text = LinkManager.GetVideoID(testvideoURL); ;
 
-            TextBox2.Text = LinkManager.GetVideoID(videoURL); ;
+            //Bar.Width = 500 / 2;
+
+            Bar.Width = 0;
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void Download_Button_Click(object sender, RoutedEventArgs e)
         {
+            //Download.Video(testvideoURL);
 
-            Download.Video(videoURL);
-
-                   
         }
 
+        private void videoURL_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if(LinkHandler.IsValidLink(videoURL.Text))
+            {
+                debug.Content = "ValidLink";
+
+                VideoThumbnail_Image.Source = LinkHandler.GetThumbnail(videoURL.Text);
+            }
+            else
+            {
+                debug.Content = "NotValidLink";
+            }
+        }
     }
 
 }
-
 

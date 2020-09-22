@@ -24,7 +24,7 @@ namespace YoutubeDownloader.Class
         public static void GetJsonResponse(string videoURL)
         {
 
-            string videoID = LinkManager.GetVideoID(videoURL);
+            string videoID = LinkHandler.GetVideoID(videoURL);
 
             string HTMLDetails;
             //string videoDetails = string.Format("https://www.youtube.com/get_video_info?video_id={0}&el=detailpage", videoID);

@@ -7,7 +7,7 @@ namespace YoutubeDownloader.Classes
 {
     public static class Debug
     {
-        private static string savePath = "C:/Users/Admin/Downloads/YoutubeDownloader/";
+        public static string savePath = "C:/Users/Admin/Downloads/YoutubeDownloader/";
         public static void SaveFile(string data, string filename, string extension = null)
         {
             File.WriteAllText(savePath + filename + extension, data);
