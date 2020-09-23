@@ -40,37 +40,14 @@ namespace YoutubeDownloader.Classes
             return false;
         }
 
-        public static BitmapImage GetThumbnail(string videoURL)
+        public static async Task<BitmapImage> GetThumbnailAsync(string videoURL)
         {
             string videoID = GetVideoID(videoURL);
             string thumbURL = string.Format("https://i.ytimg.com/vi/{0}/maxresdefault.jpg", videoID);
             string fileName = string.Format("thumb-{0}.jpg", videoID);
 
-            var request = (HttpWebRequest)WebRequest.Create(thumbURL);
+            await Task.Run(() => WebHandler.DownloadContent(thumbURL, fileName, Debug.savePath));
 
-            using (WebResponse Wresponse = request.GetResponse())
-            {
-                using (Stream source = Wresponse.GetResponseStream())
-                {
-                    using (FileStream target = File.Open(Debug.savePath + fileName, FileMode.Create, FileAccess.Write))
-                    {
-                        var buffer = new byte[1024];
-                        bool cancel = false;
-                        int bytes;
-                        int copiedBytes = 0;
-
-                        while (!cancel && (bytes = source.Read(buffer, 0, buffer.Length)) > 0)
-                        {
-                            target.Write(buffer, 0, bytes);
-
-                            copiedBytes += bytes;
-
-                            //(copiedBytes * 1.0 / Wresponse.ContentLength) * 100);
-
-                        }
-                    }
-                }
-            }
             var path = new Uri(Debug.savePath + fileName);
             return new BitmapImage(path);
         }

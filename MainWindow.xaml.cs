@@ -60,19 +60,43 @@ namespace YoutubeDownloader
 
         }
 
-        private void videoURL_TextChanged(object sender, TextChangedEventArgs e)
+        private async void videoURL_TextChanged(object sender, TextChangedEventArgs e)
         {
             if(LinkHandler.IsValidLink(videoURL.Text))
             {
                 debug.Content = "ValidLink";
 
-                VideoThumbnail_Image.Source = LinkHandler.GetThumbnail(videoURL.Text);
+                
+
+                VideoThumbnail_Image.Source = await getThumbnail(videoURL.Text);
+
             }
             else
             {
                 debug.Content = "NotValidLink";
             }
         }
+
+        private async Task<BitmapImage> getThumbnail(string url)
+        {
+            BitmapImage thumbnail = null;
+            Double progress = 0;
+            bool alreadystarted = false;
+
+            while (progress < 100.0)
+            {
+                if (!alreadystarted)
+                {
+                   thumbnail = await LinkHandler.GetThumbnailAsync(url).ConfigureAwait(false);
+                }
+                progress = WebHandler.Progress;
+                debug.Content = progress;
+            }
+
+            return thumbnail;
+        }
+
+        
     }
 
 }

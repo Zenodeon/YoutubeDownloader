@@ -10,7 +10,7 @@ namespace YoutubeDownloader.Classes
     {
         public static Uri GetVideo(string url)
         {
-            string VideoPageSource = HttpHandler.GetPageSouce(url);
+            string VideoPageSource = WebHandler.GetPageSouce(url);
 
             Debug.SaveFile(VideoPageSource, "VideoPageSource");
 
