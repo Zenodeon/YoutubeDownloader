@@ -42,7 +42,7 @@ namespace YoutubeDownloader.Classes
 
                             copiedBytes += bytes;
 
-                            Progress = ((copiedBytes * 1.0 / Wresponse.ContentLength) * 100.0);
+                           Progress = ((copiedBytes * 1.0 / Wresponse.ContentLength) * 100.0);
                         }
                     }
                 }

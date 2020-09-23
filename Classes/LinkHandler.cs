@@ -39,7 +39,7 @@ namespace YoutubeDownloader.Classes
 
             return false;
         }
-
+        
         public static async Task<BitmapImage> GetThumbnailAsync(string videoURL)
         {
             string videoID = GetVideoID(videoURL);
