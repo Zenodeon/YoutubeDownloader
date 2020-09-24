@@ -17,7 +17,7 @@
         <TextBox Name="videoURL" HorizontalAlignment="Left" FontSize="15" Margin="10,0,0,0" Text="URL" TextWrapping="NoWrap" VerticalAlignment="Center" Width="584" Height="22" TextChanged="videoURL_TextChanged"/>
         <Button Name="Download_Button" Content="Download" HorizontalAlignment="Right" Margin="653,23,10,0" VerticalAlignment="Top" Height="41" Width="127" Click="Download_Button_Click"/>
         <Image Name="VideoThumbnail_Image" HorizontalAlignment="Left" Height="239" Margin="10,21,0,0" VerticalAlignment="Top" Width="447" Grid.Row="1"/>
-        <Rectangle Name="Bar" HorizontalAlignment="Left" Height="25" Margin="10,0,10,0" Grid.Row="2" Fill="GreenYellow" VerticalAlignment="Center" Width="780"/>
+        <Rectangle Name="Bar" HorizontalAlignment="Left" Height="25" Margin="10,0,10,0" Grid.Row="2" Fill="GreenYellow" VerticalAlignment="Center" Width="0"/>
 
 
     </Grid>

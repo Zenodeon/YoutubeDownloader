@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Net;
 using System.Text;
+using System.Windows.Shapes;
+using Rectangle = System.Windows.Shapes.Rectangle;
 
 namespace YoutubeDownloader.Classes
 {
@@ -21,7 +24,7 @@ namespace YoutubeDownloader.Classes
         public static bool cancelDownloads = false;
 
         public static Double Progress;
-        public static void DownloadContent(String url, string fileName, string fileSavePath)
+        public static void DownloadContent(String url, string fileName, string fileSavePath, Rectangle bar)
         {
             var request = (HttpWebRequest)WebRequest.Create(url);
 
@@ -42,7 +45,9 @@ namespace YoutubeDownloader.Classes
 
                             copiedBytes += bytes;
 
-                           Progress = ((copiedBytes * 1.0 / Wresponse.ContentLength) * 100.0);
+                           Progress = ((copiedBytes * 1.0 / Wresponse.ContentLength) * 780.0);
+
+                            bar.Width = Progress;
                         }
                     }
                 }

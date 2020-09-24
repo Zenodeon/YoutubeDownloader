@@ -16,8 +16,6 @@ namespace YoutubeDownloader
         public MainWindow()
         {
             InitializeComponent();
-
-            Bar.Width = 0;
         }
 
         private void Download_Button_Click(object sender, RoutedEventArgs e)
@@ -32,7 +30,7 @@ namespace YoutubeDownloader
             {
                 debug.Content = "ValidLink";
 
-                BitmapImage image = await getThumbnail(videoURL.Text);
+                BitmapImage image = await LinkHandler.GetThumbnailAsync(videoURL.Text, Bar);
 
                 VideoThumbnail_Image.Source = image;
 
@@ -42,28 +40,6 @@ namespace YoutubeDownloader
                 debug.Content = "NotValidLink";
             }
         }
-
-        private async Task<BitmapImage> getThumbnail(string url)
-        {
-            BitmapImage thumbnail = null;
-            Double progress = 0;
-            bool alreadystarted = false;
-
-            while (progress < 100.0)
-            {
-                if (!alreadystarted)
-                {
-                    alreadystarted = true;
-                    thumbnail = await LinkHandler.GetThumbnailAsync(url);
-                }
-                progress = WebHandler.Progress;
-                debug.Content = progress;
-            }
-            
-            return thumbnail;
-        }
-
-
     }
 
 }
