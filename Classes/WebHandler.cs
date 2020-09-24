@@ -4,6 +4,8 @@ using System.Drawing;
 using System.IO;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Rectangle = System.Windows.Shapes.Rectangle;
 
@@ -24,7 +26,7 @@ namespace YoutubeDownloader.Classes
         public static bool cancelDownloads = false;
 
         public static Double Progress;
-        public static void DownloadContent(String url, string fileName, string fileSavePath, Rectangle bar)
+        public static void DownloadContent(String url, string fileName, string fileSavePath, MainWindow MW)
         {
             var request = (HttpWebRequest)WebRequest.Create(url);
 
@@ -47,16 +49,11 @@ namespace YoutubeDownloader.Classes
 
                            Progress = ((copiedBytes * 1.0 / Wresponse.ContentLength) * 780.0);
 
-                            bar.Width = Progress;
+                            MW.update(Progress);
                         }
                     }
                 }
             }
-        }
-
-        public static void UpdateProgress(Double k)
-        {
-
         }
     }
 }

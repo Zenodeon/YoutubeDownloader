@@ -10,6 +10,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Media;
 using System.Threading.Tasks;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace YoutubeDownloader.Classes
 {
@@ -41,13 +42,13 @@ namespace YoutubeDownloader.Classes
             return false;
         }
         
-        public static async Task<BitmapImage> GetThumbnailAsync(string videoURL, Rectangle bar)
+        public static async Task<BitmapImage> GetThumbnailAsync(string videoURL, MainWindow MW)
         {
             string videoID = GetVideoID(videoURL);
             string thumbURL = string.Format("https://i.ytimg.com/vi/{0}/maxresdefault.jpg", videoID);
             string fileName = string.Format("thumb-{0}.jpg", videoID);
 
-            await Task.Run(() => WebHandler.DownloadContent(thumbURL, fileName, Debug.savePath, bar));
+            await Task.Run(() => WebHandler.DownloadContent(thumbURL, fileName, Debug.savePath, MW));
 
             var path = new Uri(Debug.savePath + fileName);
             return new BitmapImage(path);
