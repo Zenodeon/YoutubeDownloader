@@ -13,17 +13,24 @@ namespace YoutubeDownloader
 {
     public partial class MainWindow : Window
     {
+        Progress<IProgressData> progress = new Progress<IProgressData>();
+        IProgressData progressData = new IProgressData();
+
+        private bool vaildLink = false;
+
         public MainWindow()
         {
             InitializeComponent();
-
-
+            
+            progress.ProgressChanged += ProgressUpdater;
         }
 
-        private void Download_Button_Click(object sender, RoutedEventArgs e)
+        private async void Download_Button_Click(object sender, RoutedEventArgs e)
         {
-            //Download.Video(testvideoURL);
-
+            if (vaildLink)
+            {
+                await LinkHandler.DownloadVideo(videoURL.Text, progress);
+            }
         }
 
         private async void videoURL_TextChanged(object sender, TextChangedEventArgs e)
@@ -31,8 +38,9 @@ namespace YoutubeDownloader
             if (LinkHandler.IsValidLink(videoURL.Text))
             {
                 debug.Content = "ValidLink";
-
-                BitmapImage image = await LinkHandler.GetThumbnailAsync(videoURL.Text, this);
+                vaildLink = true;
+                
+                BitmapImage image = await LinkHandler.GetThumbnailAsync(videoURL.Text, progress);
 
                 VideoThumbnail_Image.Source = image;
 
@@ -40,11 +48,13 @@ namespace YoutubeDownloader
             else
             {
                 debug.Content = "NotValidLink";
+                vaildLink = false;
             }
         }
-        public static void update(Double progress)
-        {
 
+        private void ProgressUpdater(object sender, IProgressData e)
+        {
+            Bar2.Value = e.Percent;
         }
 
     }
