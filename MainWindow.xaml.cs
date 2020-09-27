@@ -34,7 +34,7 @@ namespace YoutubeDownloader
         {
             if (vaildLink)
             {
-                await LinkHandler.DownloadVideo(videoURL.Text, progress);
+                await WebHelper.DownloadVideoAsync(videoURL.Text, progress);
             }
         }
 
@@ -46,9 +46,9 @@ namespace YoutubeDownloader
 
                 vaildLink = true;
                
-                BitmapImage image = await LinkHandler.GetThumbnailAsync(videoURL.Text, progress);
+                //BitmapImage image = await WebHelper.GetThumbnailAsync(videoURL.Text, progress);
 
-                VideoThumbnail_Image.Source = image;
+                //VideoThumbnail_Image.Source = image;
 
             }
             else
@@ -68,28 +68,20 @@ namespace YoutubeDownloader
             var videoID = LinkHandler.GetVideoID(videoURL.Text);
             string videoInfoLink = string.Format("https://www.youtube.com/get_video_info?video_id={0}&el=detailpage&hl=en", videoID);
 
-            var rawVideoInfo = WebHandler.GetPageSouce(videoInfoLink);
+            var rawVideoInfo = WebHelper.GetPageSouce(videoInfoLink);
 
             Debug.SaveFile(rawVideoInfo, "RawVideoInfo");
 
-            var videoInfo = new Dictionary<string, string>();
-
-            foreach (string vp in Regex.Split(rawVideoInfo, "&"))
-            {
-                string[] strings = Regex.Split(vp, "=");
-
-                videoInfo.Add(strings[0], strings.Length == 2 ? HttpUtility.UrlDecode(strings[1]) : string.Empty);
-            }
-
-            JObject videoInfoJson = JObject.Parse(JsonConvert.SerializeObject(videoInfo).ToString());
+            JObject videoInfoJson = JsonHelper.ConvertToJson(rawVideoInfo);
 
             Debug.SaveFile(videoInfoJson.ToString(), "VideoInfoJson");
 
             JObject videoInfoPlayerJson = JObject.Parse(videoInfoJson["player_response"].ToString());
 
             Debug.SaveFile(videoInfoPlayerJson.ToString(), "VideoInfoPlayerJson");
+            
         }
     }
-
+    
 }
 
