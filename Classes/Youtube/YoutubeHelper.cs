@@ -3,15 +3,16 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
+using YoutubeDownloader.Classes.Youtube;
 
 namespace YoutubeDownloader.Classes
 {
-    static class YoutubeVideo
+    static class YoutubeHelper
     {
         //https://www.youtube.com/watch?v=wWQPnhG0xHU
-        public static IVideoInfo GetVideoData(string url)
+        public static VideoInfo GetVideoData(string url)
         { 
-            var videoID = LinkHandler.GetVideoID(url);
+            var videoID = VideoLink.GetVideoID(url);
             string videoInfoLink = 
                 string.Format("https://www.youtube.com/get_video_info?video_id={0}&el=detailpage&hl=en", videoID);
 
@@ -19,7 +20,7 @@ namespace YoutubeDownloader.Classes
 
             Debug.SaveFile(rawVideoInfo, "RawVideoInfo");
 
-            IVideoInfo videoInfo = new IVideoInfo();
+            VideoInfo videoInfo = new VideoInfo();
 
             videoInfo.rawVideoInfo = JsonHelper.ConvertToJson(rawVideoInfo);
 
@@ -38,11 +39,6 @@ namespace YoutubeDownloader.Classes
             Debug.SaveFile(videoInfo.AdaptiveFormats.ToString(), "AdFormats");//
 
             return videoInfo;
-        }
-
-        public static void AnalyzeVideoData(string url)
-        {
-
         }
 
     }

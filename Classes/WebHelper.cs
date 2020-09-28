@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using YoutubeDownloader.Classes.Youtube;
 using Rectangle = System.Windows.Shapes.Rectangle;
 
 namespace YoutubeDownloader.Classes
@@ -23,9 +24,9 @@ namespace YoutubeDownloader.Classes
             }
         }
 
-        public static async Task<BitmapImage> GetThumbnailAsync(string videoURL, IProgress<IProgressData> progress)
+        public static async Task<BitmapImage> GetThumbnailAsync(string videoURL, IProgress<DownloadProgressData> progress)
         {
-            string videoID = LinkHandler.GetVideoID(videoURL);
+            string videoID = VideoLink.GetVideoID(videoURL);
             string thumbURL = string.Format("https://i.ytimg.com/vi/{0}/maxresdefault.jpg", videoID);
             string fileName = string.Format("thumb-{0}.jpg", videoID);
 
@@ -35,10 +36,10 @@ namespace YoutubeDownloader.Classes
             return new BitmapImage(path);
         }
 
-        public static async Task DownloadVideoAsync(string videoURL, IProgress<IProgressData> progress)
+        public static async Task DownloadVideoAsync(string videoURL, IProgress<DownloadProgressData> progress)
         {
-            string videoID = LinkHandler.GetVideoID(videoURL);
-            IVideoInfo videoInfo = YoutubeVideo.GetVideoData(videoURL);
+            string videoID = VideoLink.GetVideoID(videoURL);
+            VideoInfo videoInfo = YoutubeHelper.GetVideoData(videoURL);
 
             string fileName = string.Format("video-{0}.mp4", videoID);
 

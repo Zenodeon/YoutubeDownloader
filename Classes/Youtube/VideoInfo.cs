@@ -5,7 +5,7 @@ using System.Text;
 
 namespace YoutubeDownloader.Classes
 {
-    class IVideoInfo
+    class VideoInfo
     {
         public JObject rawVideoInfo { get; set; }
         public JObject PlayerResponse { get; set; }

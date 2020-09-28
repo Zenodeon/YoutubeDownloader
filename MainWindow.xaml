@@ -19,6 +19,7 @@
         <Button Name="debug_Button" Content="Debugbutton" HorizontalAlignment="Right" Margin="653,69,10,0" VerticalAlignment="Top" Height="22" Width="127" Click="debug_Button_Click"/>
         <Image Name="VideoThumbnail_Image" HorizontalAlignment="Left" Height="239" Margin="10,21,10,0" VerticalAlignment="Top" Width="447" Grid.Row="1"/>
         <ProgressBar Name="Bar2" HorizontalAlignment="Center" Height="14" Grid.Row="2" Margin="10,0,10,0"  VerticalAlignment="Center" Width="780"/>
+        <ListBox Name="videoQuailty_List" Margin="505,10,10,10" Grid.Row="1" TextBlock.FontSize="17" MouseDoubleClick="videoQuailty_List_MouseDoubleClick" />
 
 
     </Grid>

@@ -10,16 +10,16 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using System.Windows.Input;
 using YoutubeDownloader.Classes;
-
-
+using YoutubeDownloader.Classes.Youtube;
 
 namespace YoutubeDownloader
 {
     public partial class MainWindow : Window
     {
-        Progress<IProgressData> progress = new Progress<IProgressData>();
-        IProgressData progressData = new IProgressData();
+        Progress<DownloadProgressData> progress = new Progress<DownloadProgressData>();
+        DownloadProgressData progressData = new DownloadProgressData();
 
         private bool vaildLink = false;
 
@@ -40,16 +40,18 @@ namespace YoutubeDownloader
 
         private async void videoURL_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (LinkHandler.IsValidLink(videoURL.Text))
+            if (VideoLink.IsValidLink(videoURL.Text))
             {
                 debug.Content = "ValidLink";
 
                 vaildLink = true;
                
-                //BitmapImage image = await WebHelper.GetThumbnailAsync(videoURL.Text, progress);
+                BitmapImage image = await WebHelper.GetThumbnailAsync(videoURL.Text, progress);
 
-                //VideoThumbnail_Image.Source = image;
+                VideoThumbnail_Image.Source = image;
 
+
+                UpdateList(videoURL.Text);
             }
             else
             {
@@ -58,28 +60,42 @@ namespace YoutubeDownloader
             }
         }
 
-        private void ProgressUpdater(object sender, IProgressData e)
+        private void UpdateList(string url)
+        {
+            VideoInfo vi = new VideoInfo();
+            vi = YoutubeHelper.GetVideoData(url);
+
+            //JArray formats = vi.Formats;
+            JArray formats = vi.AdaptiveFormats;
+
+
+            foreach(var info in formats)
+            {
+                if (info["mimeType"].ToString() != "video/webm; codecs=\"vp9\"")
+                {
+                    videoQuailty_List.Items.Add(info["qualityLabel"]);
+                }
+            }
+        }
+
+        private void ProgressUpdater(object sender, DownloadProgressData e)
         {
             Bar2.Value = e.Percent;
         }
 
         private void debug_Button_Click(object sender, RoutedEventArgs e)
         {
-            var videoID = LinkHandler.GetVideoID(videoURL.Text);
-            string videoInfoLink = string.Format("https://www.youtube.com/get_video_info?video_id={0}&el=detailpage&hl=en", videoID);
-
-            var rawVideoInfo = WebHelper.GetPageSouce(videoInfoLink);
-
-            Debug.SaveFile(rawVideoInfo, "RawVideoInfo");
-
-            JObject videoInfoJson = JsonHelper.ConvertToJson(rawVideoInfo);
-
-            Debug.SaveFile(videoInfoJson.ToString(), "VideoInfoJson");
-
-            JObject videoInfoPlayerJson = JObject.Parse(videoInfoJson["player_response"].ToString());
-
-            Debug.SaveFile(videoInfoPlayerJson.ToString(), "VideoInfoPlayerJson");
+            videoQuailty_List.Items.Add("bruh");
             
+        }
+
+        private void videoQuailty_List_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            ListBox lb = sender as ListBox;
+            if (lb.SelectedIndex != -1)
+            {
+                MessageBox.Show(lb.SelectedIndex + "");
+            }
         }
     }
     

@@ -12,6 +12,7 @@ using System.Net.Http;
 using YoutubeDownloader.Classes;
 using System.Threading.Tasks;
 using System.Linq;
+using YoutubeDownloader.Classes.Youtube;
 
 namespace YoutubeDownloader.Class
 {
@@ -24,7 +25,7 @@ namespace YoutubeDownloader.Class
         public static void GetJsonResponse(string videoURL)
         {
 
-            string videoID = LinkHandler.GetVideoID(videoURL);
+            string videoID = VideoLink.GetVideoID(videoURL);
 
             string HTMLDetails;
             //string videoDetails = string.Format("https://www.youtube.com/get_video_info?video_id={0}&el=detailpage", videoID);

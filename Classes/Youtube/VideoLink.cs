@@ -1,20 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
-using System.IO;
-using System.Net;
 using System.Text;
-using System.Windows.Controls;
-using System.Windows.Media.Animation;
-using System.Windows.Media.Imaging;
-using System.Windows.Media;
-using System.Threading.Tasks;
-using System.Windows.Shapes;
-using System.Windows.Threading;
 
-namespace YoutubeDownloader.Classes
+namespace YoutubeDownloader.Classes.Youtube
 {
-    static class LinkHandler
+    static class VideoLink
     {
         public static string GetVideoID(string videoURL)
         {
@@ -35,14 +25,12 @@ namespace YoutubeDownloader.Classes
         {
             var videoID = GetVideoID(url);
 
-            if(videoID.Length == 11)
+            if (videoID.Length == 11)
             {
                 return true;
             }
 
             return false;
         }
-        
-
     }
 }
