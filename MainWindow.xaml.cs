@@ -18,17 +18,27 @@ namespace YoutubeDownloader
 {
     public partial class MainWindow : Window
     {
+        BackgroundWorker lister = new BackgroundWorker();
+
         Progress<DownloadProgressData> progress = new Progress<DownloadProgressData>();
-        DownloadProgressData progressData = new DownloadProgressData();
+        //DownloadProgressData progressData = new DownloadProgressData();
 
         private bool vaildLink = false;
+
+        JArray AvailableFormats = new JArray();
 
         public MainWindow()
         {
             InitializeComponent();
-            
+
+            lister.DoWork += GetAvailableFormats;
+            lister.WorkerReportsProgress = true;
+            lister.ProgressChanged += UpdateFormatList;
+
             progress.ProgressChanged += ProgressUpdater;
+            
         }
+
 
         private async void Download_Button_Click(object sender, RoutedEventArgs e)
         {
@@ -50,8 +60,9 @@ namespace YoutubeDownloader
 
                 VideoThumbnail_Image.Source = image;
 
-
-                UpdateList(videoURL.Text);
+                AvailableFormats.Clear();
+                videoQuailty_List.Items.Clear();
+                lister.RunWorkerAsync(argument: videoURL.Text);
             }
             else
             {
@@ -60,21 +71,35 @@ namespace YoutubeDownloader
             }
         }
 
-        private void UpdateList(string url)
+        private void GetAvailableFormats(object sender, DoWorkEventArgs e)
         {
-            VideoInfo vi = new VideoInfo();
-            vi = YoutubeHelper.GetVideoData(url);
+            VideoInfo vi = YoutubeHelper.GetVideoData((string)e.Argument);
 
             //JArray formats = vi.Formats;
             JArray formats = vi.AdaptiveFormats;
-
-
-            foreach(var info in formats)
+            JArray listedFormats = new JArray();
+            int pg = 0;
+            foreach (var info in formats)
             {
                 if (info["mimeType"].ToString() != "video/webm; codecs=\"vp9\"")
                 {
-                    videoQuailty_List.Items.Add(info["qualityLabel"]);
+
+                    listedFormats.Add(info);
+
+                    lister.ReportProgress(pg, info);
+                    pg++;
                 }
+            }
+
+        }
+
+        private void UpdateFormatList(object sender, ProgressChangedEventArgs e)
+        {
+            JToken format = (JToken)e.UserState;
+            if (format["qualityLabel"] != null)
+            {
+                videoQuailty_List.Items.Add(format["qualityLabel"]);
+                AvailableFormats.Add(format);
             }
         }
 
@@ -83,19 +108,22 @@ namespace YoutubeDownloader
             Bar2.Value = e.Percent;
         }
 
-        private void debug_Button_Click(object sender, RoutedEventArgs e)
-        {
-            videoQuailty_List.Items.Add("bruh");
-            
-        }
-
+     
         private void videoQuailty_List_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             ListBox lb = sender as ListBox;
             if (lb.SelectedIndex != -1)
             {
-                MessageBox.Show(lb.SelectedIndex + "");
+                MessageBox.Show(AvailableFormats[lb.SelectedIndex]["qualityLabel"] + "");
             }
+        }
+
+        //debug
+        float test = 0;
+        private void debug_Button_Click(object sender, RoutedEventArgs e)
+        {
+            videoQuailty_List.Items.Add(test++);
+
         }
     }
     
