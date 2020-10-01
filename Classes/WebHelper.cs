@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -36,12 +37,22 @@ namespace YoutubeDownloader.Classes
             return new BitmapImage(path);
         }
 
-        public static async Task DownloadVideoAsync(string videoURL, IProgress<DownloadProgressData> progress)
+        public static async Task DownloadVideoAsync(JObject format, VideoInfo videoInfo, IProgress<DownloadProgressData> progress)
         {
-            string videoID = VideoLink.GetVideoID(videoURL);
-            VideoInfo videoInfo = YoutubeHelper.GetVideoData(videoURL);
 
-            string fileName = string.Format("video-{0}.mp4", videoID);
+            string signature = format["signatureCipher"].ToString();
+
+            JObject signatureCipher = JsonHelper.ConvertToJson(signature);
+
+            Decrypter.Decrypt(signatureCipher);
+
+
+
+
+
+
+
+            //string fileName = string.Format("video-{0}.mp4", videoID);
 
             //await Task.Run(() => Download.DownloadContent(videoLink, fileName, Debug.savePath, progress));
         }

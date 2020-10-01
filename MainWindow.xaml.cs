@@ -26,6 +26,9 @@ namespace YoutubeDownloader
         private bool vaildLink = false;
 
         JArray AvailableFormats = new JArray();
+        JToken SelectedFormat;
+
+        VideoInfo SVD;
 
         public MainWindow()
         {
@@ -42,9 +45,9 @@ namespace YoutubeDownloader
 
         private async void Download_Button_Click(object sender, RoutedEventArgs e)
         {
-            if (vaildLink)
+            if (SelectedFormat != null)
             {
-                await WebHelper.DownloadVideoAsync(videoURL.Text, progress);
+                await WebHelper.DownloadVideoAsync(JObject.Parse(SelectedFormat.ToString()), SVD, progress);
             }
         }
 
@@ -73,10 +76,10 @@ namespace YoutubeDownloader
 
         private void GetAvailableFormats(object sender, DoWorkEventArgs e)
         {
-            VideoInfo vi = YoutubeHelper.GetVideoData((string)e.Argument);
+            VideoInfo SVD = YoutubeHelper.GetVideoData((string)e.Argument);
 
             //JArray formats = vi.Formats;
-            JArray formats = vi.AdaptiveFormats;
+            JArray formats = SVD.AdaptiveFormats;
             JArray listedFormats = new JArray();
             int pg = 0;
             foreach (var info in formats)
@@ -114,7 +117,8 @@ namespace YoutubeDownloader
             ListBox lb = sender as ListBox;
             if (lb.SelectedIndex != -1)
             {
-                MessageBox.Show(AvailableFormats[lb.SelectedIndex]["qualityLabel"] + "");
+                debug.Content = AvailableFormats[lb.SelectedIndex]["qualityLabel"] + "";
+                SelectedFormat = AvailableFormats[lb.SelectedIndex];
             }
         }
 

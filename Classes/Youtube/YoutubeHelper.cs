@@ -41,5 +41,10 @@ namespace YoutubeDownloader.Classes
             return videoInfo;
         }
 
+        public static void DownloadFormat(JObject format)
+        {
+
+        }
+
     }
 }
