@@ -10,7 +10,7 @@ namespace YoutubeDownloader.Classes
     static class Download
     {
         public static bool cancelDownloads = false;
-        public static void DownloadContent(String url, string fileName, string savePath, IProgress<DownloadProgressData> progress)
+        public static void DownloadContent(string url, string fileName, string savePath, IProgress<DownloadProgressData> progress)
         {
             DownloadProgressData Data = new DownloadProgressData();
 

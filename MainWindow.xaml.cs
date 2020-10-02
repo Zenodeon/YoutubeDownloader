@@ -39,7 +39,7 @@ namespace YoutubeDownloader
             lister.ProgressChanged += UpdateFormatList;
 
             progress.ProgressChanged += ProgressUpdater;
-            
+
         }
 
 
@@ -58,7 +58,7 @@ namespace YoutubeDownloader
                 debug.Content = "ValidLink";
 
                 vaildLink = true;
-               
+
                 BitmapImage image = await WebHelper.GetThumbnailAsync(videoURL.Text, progress);
 
                 VideoThumbnail_Image.Source = image;
@@ -76,7 +76,7 @@ namespace YoutubeDownloader
 
         private void GetAvailableFormats(object sender, DoWorkEventArgs e)
         {
-            VideoInfo SVD = YoutubeHelper.GetVideoData((string)e.Argument);
+            SVD = YoutubeHelper.GetVideoData((string)e.Argument);
 
             //JArray formats = vi.Formats;
             JArray formats = SVD.AdaptiveFormats;
@@ -111,7 +111,7 @@ namespace YoutubeDownloader
             Bar2.Value = e.Percent;
         }
 
-     
+
         private void videoQuailty_List_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             ListBox lb = sender as ListBox;
@@ -126,10 +126,78 @@ namespace YoutubeDownloader
         float test = 0;
         private void debug_Button_Click(object sender, RoutedEventArgs e)
         {
-            videoQuailty_List.Items.Add(test++);
+            var link = string.Format("https://www.youtube.com{0}", SVD.jsFile);
+
+            var _root = WebHelper.GetPageSouce(link);
+
+            Debug.SaveFile(_root, "jsfile");
+
+            string TryGetDeciphererFuncBody()
+            {
+                var funcName = Regex.Match(_root, @"(\w+)=function\(\w+\){(\w+)=\2\.split\(\x22{2}\);.*?return\s+\2\.join\(\x22{2}\)}")
+                    .Groups[0]
+                    .Value;
+
+                return funcName;
+            }
+
+            Debug.SaveFile(TryGetDeciphererFuncBody(), "DeciphererFuncBody");
+
+            string TryGetDeciphererDefinitionBody(string body)
+            {
+                var objName = Regex.Match(body, "([\\$_\\w]+).\\w+\\(\\w+,\\d+\\);")
+                    .Groups[1]
+                    .Value;
+
+                var escapedObjName = Regex.Escape(objName);
+
+                return Regex.Match(_root, $@"var\s+{escapedObjName}=\{{(\w+:function\(\w+(,\w+)?\)\{{(.*?)\}}),?\}};", RegexOptions.Singleline)
+                    .Groups[0]
+                    .Value;
+            }
+
+            Debug.SaveFile(TryGetDeciphererDefinitionBody(TryGetDeciphererFuncBody()), "DeciphererDefinitionBody");
+          
+            var deciphererFuncBody =
+                TryGetDeciphererFuncBody();
+
+            var deciphererDefinitionBody =
+                TryGetDeciphererDefinitionBody(deciphererFuncBody);
+
+            // Analyze statements to determine cipher function names
+            foreach (var statement in deciphererFuncBody.Split(";"))
+            {
+                // Get the name of the function called in this statement
+                var calledFuncName = Regex.Match(statement, @"\w+(?:.|\[)(\""?\w+(?:\"")?)\]?\(").Groups[1].Value;
+                if (string.IsNullOrWhiteSpace(calledFuncName))
+                    continue;
+
+                // Slice
+                if (Regex.IsMatch(deciphererDefinitionBody, $@"{Regex.Escape(calledFuncName)}:\bfunction\b\([a],b\).(\breturn\b)?.?\w+\."))
+                {
+                    var index = Regex.Match(statement, @"\(\w+,(\d+)\)").Groups[1].Value;
+                    Debug.SaveFile(Regex.Match(statement, @"\(\w+,(\d+)\)").ToString(), "SliceFull");
+                    Debug.SaveFile(index, "Slice");
+                }
+
+                // Swap
+                else if (Regex.IsMatch(deciphererDefinitionBody, $@"{Regex.Escape(calledFuncName)}:\bfunction\b\(\w+\,\w\).\bvar\b.\bc=a\b"))
+                {
+                    var index = Regex.Match(statement, @"\(\w+,(\d+)\)").Groups[1].Value;
+                    Debug.SaveFile(Regex.Match(statement, @"\(\w+,(\d+)\)").ToString(), "SwapFull");
+                    Debug.SaveFile(index, "Swap");
+                }
+
+                // Reverse
+                else if (Regex.IsMatch(deciphererDefinitionBody, $@"{Regex.Escape(calledFuncName)}:\bfunction\b\(\w+\)"))
+                {
+                    //Debug.SaveFile(index, "Slice");
+                }
+            }
+
 
         }
     }
-    
+
 }
 
