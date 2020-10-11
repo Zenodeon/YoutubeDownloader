@@ -44,7 +44,7 @@ namespace YoutubeDownloader.Classes
 
             JObject signatureCipher = JsonHelper.ConvertToJson(signature);
 
-            Decrypter.Decrypt(signatureCipher);
+            //Decrypter.Decrypt(signatureCipher);
 
 
 

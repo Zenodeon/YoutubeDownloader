@@ -123,77 +123,26 @@ namespace YoutubeDownloader
         }
 
         //debug
-        float test = 0;
+
         private void debug_Button_Click(object sender, RoutedEventArgs e)
         {
-            var link = string.Format("https://www.youtube.com{0}", SVD.jsFile);
+            var a = "abcdefghi";
+            var b = a.ToCharArray();
 
-            var _root = WebHelper.GetPageSouce(link);
+            Array.Reverse(b);
 
-            Debug.SaveFile(_root, "jsfile");
+            a = new string(b);
+            Debug.SaveFile(a + "", "arrrayle");
 
-            string TryGetDeciphererFuncBody()
-            {
-                var funcName = Regex.Match(_root, @"(\w+)=function\(\w+\){(\w+)=\2\.split\(\x22{2}\);.*?return\s+\2\.join\(\x22{2}\)}")
-                    .Groups[0]
-                    .Value;
+            
 
-                return funcName;
-            }
+            var format = JObject.Parse(SelectedFormat.ToString());
 
-            Debug.SaveFile(TryGetDeciphererFuncBody(), "DeciphererFuncBody");
+            string signature = format["signatureCipher"].ToString();
 
-            string TryGetDeciphererDefinitionBody(string body)
-            {
-                var objName = Regex.Match(body, "([\\$_\\w]+).\\w+\\(\\w+,\\d+\\);")
-                    .Groups[1]
-                    .Value;
+            JObject signatureCipher = JsonHelper.ConvertToJson(signature);
 
-                var escapedObjName = Regex.Escape(objName);
-
-                return Regex.Match(_root, $@"var\s+{escapedObjName}=\{{(\w+:function\(\w+(,\w+)?\)\{{(.*?)\}}),?\}};", RegexOptions.Singleline)
-                    .Groups[0]
-                    .Value;
-            }
-
-            Debug.SaveFile(TryGetDeciphererDefinitionBody(TryGetDeciphererFuncBody()), "DeciphererDefinitionBody");
-          
-            var deciphererFuncBody =
-                TryGetDeciphererFuncBody();
-
-            var deciphererDefinitionBody =
-                TryGetDeciphererDefinitionBody(deciphererFuncBody);
-
-            // Analyze statements to determine cipher function names
-            foreach (var statement in deciphererFuncBody.Split(";"))
-            {
-                // Get the name of the function called in this statement
-                var calledFuncName = Regex.Match(statement, @"\w+(?:.|\[)(\""?\w+(?:\"")?)\]?\(").Groups[1].Value;
-                if (string.IsNullOrWhiteSpace(calledFuncName))
-                    continue;
-
-                // Slice
-                if (Regex.IsMatch(deciphererDefinitionBody, $@"{Regex.Escape(calledFuncName)}:\bfunction\b\([a],b\).(\breturn\b)?.?\w+\."))
-                {
-                    var index = Regex.Match(statement, @"\(\w+,(\d+)\)").Groups[1].Value;
-                    Debug.SaveFile(Regex.Match(statement, @"\(\w+,(\d+)\)").ToString(), "SliceFull");
-                    Debug.SaveFile(index, "Slice");
-                }
-
-                // Swap
-                else if (Regex.IsMatch(deciphererDefinitionBody, $@"{Regex.Escape(calledFuncName)}:\bfunction\b\(\w+\,\w\).\bvar\b.\bc=a\b"))
-                {
-                    var index = Regex.Match(statement, @"\(\w+,(\d+)\)").Groups[1].Value;
-                    Debug.SaveFile(Regex.Match(statement, @"\(\w+,(\d+)\)").ToString(), "SwapFull");
-                    Debug.SaveFile(index, "Swap");
-                }
-
-                // Reverse
-                else if (Regex.IsMatch(deciphererDefinitionBody, $@"{Regex.Escape(calledFuncName)}:\bfunction\b\(\w+\)"))
-                {
-                    //Debug.SaveFile(index, "Slice");
-                }
-            }
+            Decrypter.Decrypt(signatureCipher, SVD);
 
 
         }
