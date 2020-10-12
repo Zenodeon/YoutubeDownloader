@@ -127,14 +127,13 @@ namespace YoutubeDownloader
         private void debug_Button_Click(object sender, RoutedEventArgs e)
         {
             var a = "abcdefghi";
-            var b = a.ToCharArray();
 
-            Array.Reverse(b);
-
-            a = new string(b);
-            Debug.SaveFile(a + "", "arrrayle");
-
-            
+            var b = splice(a, 2);
+            Debug.SaveFile(b + "", "arrrayle");
+            b = swap(a, 2);
+            Debug.SaveFile(b + "", "arrrayle1");
+            b = rev(a);
+            Debug.SaveFile(b + "", "arrrayle2");
 
             var format = JObject.Parse(SelectedFormat.ToString());
 
@@ -146,6 +145,34 @@ namespace YoutubeDownloader
 
 
         }
+
+        private static string splice(string sc, int pos)
+        {
+            return sc.Remove(0, pos);
+        }
+
+        private static string swap(string sc, int pos)
+        {
+            var a = sc.ToCharArray();
+
+            var b = a[0];
+
+            a[0] = a[pos % a.Length];
+
+            a[pos % a.Length] = b;
+
+            return new string(a);
+        }
+
+        private static string rev(string sc)
+        {
+            var a = sc.ToCharArray();
+
+            Array.Reverse(a);
+
+            return new string(a);
+        }
+
     }
 
 }

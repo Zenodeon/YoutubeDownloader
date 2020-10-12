@@ -17,8 +17,10 @@ namespace YoutubeDownloader.Classes
             foreach (string data in Regex.Split(rawData, "&"))
             {
                 string[] strings = Regex.Split(data, "=");
-
+                
                 dataDictionary.Add(strings[0], strings.Length == 2 ? HttpUtility.UrlDecode(strings[1]) : string.Empty);
+
+                //dataDictionary.Add(strings[0], strings.Length == 2 ? strings[1] : string.Empty);
             }
 
             return JObject.Parse(JsonConvert.SerializeObject(dataDictionary).ToString());

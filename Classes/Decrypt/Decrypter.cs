@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
 using System.Text.RegularExpressions;
 using YoutubeDownloader.Classes.Decrypt;
@@ -21,7 +22,7 @@ namespace YoutubeDownloader.Classes
             Debug.SaveFile(signatureCipher.ToString(), "signatureCipher");
 
             getFuns(SVD);
-  
+
             Debug.SaveFile(JObject.Parse(JsonConvert.SerializeObject(sol)).ToString(), "solFile");
 
             var ss = signatureCipher["s"].ToString();
@@ -30,14 +31,14 @@ namespace YoutubeDownloader.Classes
 
             for (var i = 0; i < type.Count; i++)
             {
-                if(type[i] == "Splice")
+                if (type[i] == "Splice")
                 {
                     ss = splice(ss, tValue[i]);
                 }
 
                 if (type[i] == "Swap")
                 {
-                    //ss = swap(ss, tValue[i]);
+                    ss = swap(ss, tValue[i]);
                 }
 
                 if (type[i] == "Reverse")
@@ -46,7 +47,35 @@ namespace YoutubeDownloader.Classes
                 }
             }
 
-            Debug.SaveFile(ss.ToString(), "afterSignatureCipher");
+            Debug.SaveFile(ss, "afterSignatureCipher");
+
+            var url = signatureCipher["url"].ToString();
+            var key = signatureCipher["sp"].ToString();
+            // Find existing parameter
+            var existingMatch = Regex.Match(url, $"/({Regex.Escape(key)}/?.*?)(?:/|$)");
+
+            // Parameter already set to something
+            if (existingMatch.Success)
+            {
+                var group = existingMatch.Groups[1];
+
+                // Remove existing
+                url = url.Remove(group.Index, group.Length);
+
+                // Insert new one
+                url = url.Insert(group.Index, $"{key}/{ss}");
+
+            }
+            // Parameter hasn't been set yet
+            else
+            {
+                // Assemble new query string
+                url = url + '/' + key + '/' + ss;
+            }
+
+            Debug.SaveFile(url, "urlsic");
+
+            
 
         }
 
