@@ -6,6 +6,7 @@ using System.Linq;
 using System.Security.Policy;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Web;
 using YoutubeDownloader.Classes.Decrypt;
 
 namespace YoutubeDownloader.Classes
@@ -51,32 +52,14 @@ namespace YoutubeDownloader.Classes
 
             var url = signatureCipher["url"].ToString();
             var key = signatureCipher["sp"].ToString();
-            // Find existing parameter
-            var existingMatch = Regex.Match(url, $"/({Regex.Escape(key)}/?.*?)(?:/|$)");
 
-            // Parameter already set to something
-            if (existingMatch.Success)
-            {
-                var group = existingMatch.Groups[1];
+            ss = HttpUtility.UrlEncode(ss);
 
-                // Remove existing
-                url = url.Remove(group.Index, group.Length);
+            url = url + '/' + "signature" + '/' + ss;
 
-                // Insert new one
-                url = url.Insert(group.Index, $"{key}/{ss}");
 
-            }
-            // Parameter hasn't been set yet
-            else
-            {
-                // Assemble new query string
-                url = url + '/' + key + '/' + ss;
-            }
 
             Debug.SaveFile(url, "urlsic");
-
-            
-
         }
 
         private static string splice(string sc, int pos)
